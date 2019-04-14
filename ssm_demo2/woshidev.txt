@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 eqwrqwrqw
+=======
+ewqrqewrq
+>>>>>>> master
