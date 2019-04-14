@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+						http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd"
+       default-lazy-init="true">
+
+    <description>Quartz的定时集群任务配置</description>
+
+    <!-- Quartz本地Schduler -->
+    <bean id="SitaQuartzScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <!-- Triggers集成 -->
+        <property name="triggers">
+            <list>
+                <ref bean="sitaTicketOut"/>   
+            </list>
+        </property>
+        <!-- Quartz配置, 本地运行无需单独的quartz.properties文件，在此简单配置即可 -->
+        <property name="configLocation" value="classpath:quartz-cluster.properties"/>
+        <property name="dataSource" ref="dataSource"></property>
+        <!-- 启动时延期30秒开始任务 -->
+        <property name="startupDelay" value="30" />
+        <property name="overwriteExistingJobs" value="true"></property>
+        <property name="schedulerName" value="SITA"></property>
+    </bean>
+    <bean id="sitaTicketOut"
+		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail">
+			<bean class="com.sita.schedual.PactlBeanInvokingJobDetailFactoryBean">
+				<property name="durable" value="true"></property>
+				<property name="targetBean" value="ThreadPoolExcute"></property>
+				<property name="targetMethod" value="mostThreadTicketOut"></property>
+				<property name="concurrent" value="false" />
+			</bean>
+		</property>
+		<property name="cronExpression" value="0/10 * * * * ?"></property>
+	</bean>
+</beans>

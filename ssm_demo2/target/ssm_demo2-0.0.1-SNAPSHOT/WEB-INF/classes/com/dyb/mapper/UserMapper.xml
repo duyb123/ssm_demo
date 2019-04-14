@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dyb.mapper.UserMapper">
+
+	<!-- 按照主键查询 	-->
+	<select id="selectById" 
+		parameterType="int"
+		resultType="User">
+			  select id,name,pwd,sex,age,info from users where  id = #{id}
+	</select>
+	
+	<!-- 登录
+	   对应的User  selectByNameAndPwd(String  loginName,String password);
+	   使用 数组的序列，按照参数的顺序取值，从0开始  0,1
+	 -->
+	<select id="selectByNameAndPwd" resultType="user">
+	    select id,name,pwd,sex,age,info from  users where name = '${loginName}' and pwd = #{password}
+	</select>
+	
+	
+	<!-- 返回所有记录  	-->
+	<select id="selectAll" resultType="user">
+		select id,name,pwd,sex,age,info from Users
+	</select>
+	
+	<!--
+		按照姓名模糊查询  如果一个参数 一般的参数名 value
+	  -->
+	<select id="selectByName" parameterType="string" resultType="user">
+	 select id,name,pwd,sex,age,info from Users where name like '%${value}%'
+	</select>
+	
+	
+	<!-- 组合查询  性别,年龄,姓名   可以给部分参数，也可以一个都不给 -->
+	<select id="search" parameterType="user" resultType="user">
+		select id,name as username,pwd,sex,age,info 
+		from Users 
+		<trim prefix="where" prefixOverrides="and | or">
+			<if test="sex!=null">
+				and sex=#{sex}
+			</if>
+			<if test="username!=null">
+				and name like '%${username}%'
+			</if>
+			
+			<if test="age!= 0">
+				and age = #{age}
+			</if>
+		</trim>
+	</select>
+	
+	
+	<!-- 
+		插入，参数传递的是对象
+			parameterType = "com.igeekhome.pojo.User"
+			#{对象的属性}  调用 getter方法
+			#{对象的属性,javaType,jdbcType}
+			
+	 -->
+	<insert id="insertUser" parameterType="user">
+		insert into users(name,pwd,sex,age,info) 
+			values(#{username,javaType=string,jdbcType=VARCHAR},#{pwd},#{sex},#{age},#{info})
+	</insert>
+	<!--批量插入  -->
+<!-- 	<insert id="insertUsers" parameterType="list" >
+	 insert into users(name,pwd,sex,age,info)values
+		<foreach collection="list" item="item" index="index" separator=",">
+		  (#{item.name},#{item.pwd},#{item.sex},#{item.age},#{item.info})
+		</foreach>
+	</insert> -->
+	<!--批量更新  -->
+	<!-- <update id="updateUsers" parameterType="list">
+	    <foreach collection="list" item="item" index="index" separator=";">
+	      update users set name=#{item.name},pwd=#{item.pwd} where id=#{item.id}
+	    </foreach>
+	</update>
+	批量更新 
+	<update id="updateUsers" parameterType="list">
+	    
+	      update users set status=#{item.status} where in 
+	      <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+	      #{item}
+	     </foreach>
+	</update>
+	批量删除 
+	<delete id="deleteUsers">
+	delete from users where id in 
+	  <foreach collection="list" item="item" index="index" open="(" separator="," close=")" >
+	   #{item}
+	  </foreach>
+	</delete> -->
+	
+	<!-- 更新 -->
+	<update id="updateUser" parameterType="user">
+		update users 
+			<set>
+				<if test="username!=null">name = #{name},</if>
+				<if test="pwd!=null">pwd = #{pwd},</if>
+				<if test="sex!=null">sex = #{sex},</if>
+				<if test="age!=0">age = #{age},</if>
+				<if test="info!=null">info = #{info}</if>
+			</set>
+		 where  id = #{id}
+	</update>
+	
+	<!-- 删除 -->
+	<delete id="delById" parameterType="int">
+		delete from users where id = #{id}
+	</delete>
+</mapper>
